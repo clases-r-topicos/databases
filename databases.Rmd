@@ -1,0 +1,134 @@
+---
+title: "R and databases"
+subtitle: "calidad"
+author: 
+date: '`r Sys.Date()`'
+output:
+  xaringan::moon_reader:
+    seal: false
+    #lib_dir: libs
+    css: xaringan-themer.css
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: False
+      ratio: '13:9'
+---
+
+class: center, middle
+
+.linea-superior[]
+.linea-inferior[]
+
+<img src="imagenes/logo_portada2.png" width="200" />
+
+## Capacitación en R y herramientas de productividad - Bases de datos
+
+## Proyecto Estratégico Metodologías y Ciencia de Datos para la Producción Estadística
+
+### Abril 2023
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = TRUE)
+knitr::opts_chunk$set(message = FALSE, warning = F) 
+options(scipen = "999")
+```
+
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+library(xaringanthemer)
+```
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Estructura del taller
+
+**Contenidos de la clase**
+
+- `rowwise`: operaciones por fila
+
+--
+
+- "Loops" en `dplyr`
+
+--
+
+- Repaso de funciones en `R`
+
+
+**Objetivos de la clase:**
+
+- Revisar algunos contenidos de `dplyr` no tan conocidos 
+
+- Sentar las bases para los contenidos que vendrán en las próximas sesiones
+
+---
+
+class: inverse, center, middle
+
+# I. operaciones rowwise 
+
+---
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# rowwise
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(rlang)
+library(feather)
+library(tictoc)
+```
+
+
+### En `dplyr` estamos acostumbrados a operar de manera vectorizada (verticalmente)
+
+```{r}
+mtcars %>% 
+  group_by(gear) %>% 
+  summarise(media = mean(hp))
+```
+--
+
+### Queremos una variable que sea la suma de muchas otras
+
+
+```{r, eval = F}
+mtcars2 <- mtcars %>% 
+  rowwise() %>% 
+  mutate(suma = sum(cyl, disp, hp,drat)) %>% 
+  ungroup()
+
+
+
+```
+
+### rowwise es una herramienta muy útil y un poco subutilizada
+
+---
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# rowwise
+
+---
+
+class: center, middle
+
+.linea-superior[]
+.linea-inferior[]
+
+<img src="imagenes/logo_portada2.png" width="200" />
+
+## Capacitación en R y herramientas de productividad - bases de datos
+
+## Proyecto Estratégico Metodologías y Ciencia de Datos para la Producción Estadística
+
+### Abril 2023
