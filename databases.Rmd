@@ -30,7 +30,7 @@ class: center, middle
 
 ```{r setup, include=FALSE}
 options(htmltools.dir.version = TRUE)
-knitr::opts_chunk$set(message = FALSE, warning = F) 
+knitr::opts_chunk$set(message = FALSE, warning = F, eval = T) 
 options(scipen = "999")
 ```
 
@@ -44,79 +44,351 @@ background-image: url("imagenes/fondo2.PNG")
 background-size: contain;
 background-position: 100% 0%
 
+
 # Estructura del taller
 
 **Contenidos de la clase**
 
-- `rowwise`: operaciones por fila
+- Motivación
 
 --
 
-- "Loops" en `dplyr`
+- Breve comentario sobre bases de datos
 
 --
 
-- Repaso de funciones en `R`
+- Conexión a una base de datos desde R
+
+--
+
+- Consultas a una base de datos
+
+--
+
+- Construcción de una base de datos
+
+--
+
+- Consultar nuestra propia base de datos
 
 
 **Objetivos de la clase:**
 
-- Revisar algunos contenidos de `dplyr` no tan conocidos 
+- Habilitar a los estudiantes para trabajar con bases de datos desde R
 
-- Sentar las bases para los contenidos que vendrán en las próximas sesiones
 
 ---
 
 class: inverse, center, middle
 
-# I. operaciones rowwise 
+# I. Introducción 
 
 ---
 background-image: url("imagenes/fondo2.PNG")
 background-size: contain;
 background-position: 100% 0%
 
-# rowwise
+# ¿Por qué es relevante trabajar con BBDD?
+
+### Muchos datos viven en lugares diferentes a nuestros computadores 
+
+.center[
 
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-library(tidyverse)
-library(rlang)
-library(feather)
-library(tictoc)
-```
+<img src="imagenes/database_connection.png" width="600" />
 
 
-### En `dplyr` estamos acostumbrados a operar de manera vectorizada (verticalmente)
+]
 
-```{r}
-mtcars %>% 
-  group_by(gear) %>% 
-  summarise(media = mean(hp))
-```
 --
 
-### Queremos una variable que sea la suma de muchas otras
+### Como analistas, debemos ser capaces de trabajar con esos datos
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# ¿Qué es una base de datos?
 
 
-```{r, eval = F}
-mtcars2 <- mtcars %>% 
-  rowwise() %>% 
-  mutate(suma = sum(cyl, disp, hp,drat)) %>% 
-  ungroup()
+.center[
 
 
+<img src="imagenes/sql_vs_nosql.jpg" width="600" />
+
+
+]
+
+
+--
+
+### Nos centraremos en el mundo SQL (bases de datos relacionales)
+
+--
+
+Si quieres saber más sobre el mundo NoSql, puedes partir por [wikipedia](https://es.wikipedia.org/wiki/NoSQL) 
+
+---
+
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# ¿Qué es una base de datos relacional?
+
+Colección de tablas relacionadas por un campo común (key)
+
+--
+
+Un archivo csv **NO** es una base de datos  
+
+--
+
+**Las tablas se parecen a los dataframes**
+
+- Colecciones de columnas con datos del mismo tipo
+
+--
+
+**Diferencias**
+
+- Las tablas no viven en memoria
+
+- Los *dataframe* no tienen índices (*data.table* sí tiene)
+
+
+---
+
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Algunas bases de datos populares
+
+
+.center[
+
+<img src="imagenes/databases_logos.png" width="600" />
+
+]
+
+### Tienen diferencias, pero todas utilizan SQL
+
+### [Aquí](https://en.wikipedia.org/wiki/List_of_relational_database_management_systems) puedes encontrar aún más bases de datos
+
+
+--
+
+<br>
+
+.center[
+
+### Mucho blabla ¡Veamos un poco de código!
+]
+
+
+
+---
+
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Conexión a una base de datos
+
+Vamos a conectarnos a una base que contiene datos de la ENE para varios trimestres
+
+```{r}
+library(DBI)
+library(dplyr)
+```
+
+```{r}
+conn <-  DBI::dbConnect(
+  drv =  RMariaDB::MariaDB(),
+  dbname = "ine", # nombre de la base de datos
+  host =   "143.198.79.143" , # IP del servidor
+  port =   1111, # puerto
+  password = "roscalata", #  pass
+  user = "reader" #  solo permiso de lectura
+)
 
 ```
 
-### rowwise es una herramienta muy útil y un poco subutilizada
+
+.center[
+
+<img src="https://media.giphy.com/media/3o7buirYcmV5nSwIRW/giphy.gif" width="250" />
+
+]
+
+--
+
+### IMPORTANTE: SERVIDOR TESTING NO APTO PARA CONSULTAS PESADAS 
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Conexión a una base de datos
+
+.center[
+
+<img src="imagenes/port_example.png" width="600" />
+
+]
+
+### El parámetro driver corresponde a la base de datos que estamos usando
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Consultas simples con DBI
+
+Listemos las tablas dentro de la base de datos
+
+```{r}
+DBI::dbListTables(conn)
+```
+
+--
+
+Veamos el nombre de las columnas dentro de ene
+
+```{r}
+columnas <- DBI::dbListFields(conn, "ene")
+columnas
+```
+
+--
+
+Podemos leer la tabla completa, sin embargo, no siempre es buena idea
+
+```{r, eval=FALSE}
+tabla_ene <-  DBI::dbReadTable(conn, "ene")
+```
+
+--
+
+### La tabla puede ser demasiado grande y no entrar en la memoria
+
+
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Consultas simples con SQL
+
+Contemos el número de filas que tiene la tabla
+
+```{r}
+sql_output_df <- dbGetQuery(conn, "SELECT COUNT(*) AS `contar` FROM `ene`")
+sql_output_df
+```
+
+
+Podemos ver que la tabla contiene `r as.character(sql_output_df$contar[1])`
+
+No es tan buena idea pedir la tabla completa
+
+--
+
+Noten que `dbGetQuery` devuelve un data.frame con el resultado de la consulta 👀
+
 
 ---
 background-image: url("imagenes/fondo2.PNG")
 background-size: contain;
 background-position: 100% 0%
 
-# rowwise
+# Consultas por lote
+
+`dbSendQuery` envía la consulta sin hacer fetch
+
+```{r}
+sql_query <- dbSendQuery(conn, "SELECT COUNT(*) AS `contar` FROM `ene`")
+sql_query
+```
+
+Podemos hacer consultas por "lotes"
+
+```{r}
+sql_query <- dbSendQuery(conn, "SELECT sexo, edad FROM `ene`")
+output1 <- dbFetch(sql_query, 10) 
+DBI::dbHasCompleted(sql_query) 
+output2 <- dbFetch(sql_query, 10) 
+DBI::dbHasCompleted(sql_query) 
+output3 <- dbFetch(sql_query, 94023) 
+DBI::dbHasCompleted(sql_query) 
+
+```
+---
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Consultas por lotes
+
+```{r}
+sql_query <- dbSendQuery(conn, "SELECT sexo, edad FROM `ene`")
+```
+
+
+```{r}
+contar <- 0
+while (DBI::dbHasCompleted(sql_query) == FALSE ) {
+  output <- dbFetch(sql_query, 20000) 
+  contar <- contar + 1
+  print(contar)
+}
+
+```
+Con esta estrategia podemos procesar información de manera fragmentada, incluso en una máquina pequeña 😎 
+
+--
+
+.center[
+### ¿Es imprescindible aprender SQL para trabajar con una base de datos?
+]
+
+
+
+
+---
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# dplyr al rescate
+
+.center[
+<img src="imagenes/dplyr-logo.png" width="300" />
+]
+
+
+```{r}
+tabla <- tbl(conn, "ene")
+
+tabla %>% 
+  summarise(contar = n()) 
+
+
+
+```
+
 
 ---
 

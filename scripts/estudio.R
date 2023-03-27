@@ -78,8 +78,18 @@ class(test1)
 # Query using SQL
 ####################
 
-sql_output <- dbSendQuery(conn, "select sexo, edad from ene where edad >= 30") %>%
-  dbFetch()
+x <-  dbGetQuery(conn, "select sexo, edad from ene")
+
+query <- dbSendQuery(conn, "select sexo, edad from ene")
+
+output <- dbFetch(query)
+
+output2 <- dbFetch(query, 10)
+output3 <- dbFetch(query, 94022)
+output4 <- dbFetch(query, 10)
+DBI::dbHasCompleted(res = query)
+dbGetRowCount(query)
+
 
 sql_output <- dbGetQuery(conn, "select sexo, edad from ene where edad >= 30")
 
