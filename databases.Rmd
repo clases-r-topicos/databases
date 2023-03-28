@@ -74,7 +74,7 @@ background-position: 100% 0%
 
 **Objetivos de la clase:**
 
-- Habilitar a los estudiantes para trabajar con bases de datos desde R
+- Habilitar a los participantes para trabajar con bases de datos desde R
 
 
 ---
@@ -191,6 +191,12 @@ background-position: 100% 0%
 ]
 
 
+---
+
+class: inverse, center, middle
+
+# II. Conexión a una base de datos 
+
 
 ---
 
@@ -229,7 +235,7 @@ conn <-  DBI::dbConnect(
 
 --
 
-### IMPORTANTE: SERVIDOR TESTING NO APTO PARA CONSULTAS PESADAS 
+### IMPORTANTE: Estamos en un servidor de prueba. Por favor, no sobrecargar 
 
 ---
 
@@ -266,8 +272,8 @@ DBI::dbListTables(conn)
 Veamos el nombre de las columnas dentro de ene
 
 ```{r}
-columnas <- DBI::dbListFields(conn, "ene")
-columnas
+columns <- DBI::dbListFields(conn, "ene")
+columns
 ```
 
 --
@@ -275,7 +281,7 @@ columnas
 Podemos leer la tabla completa, sin embargo, no siempre es buena idea
 
 ```{r, eval=FALSE}
-tabla_ene <-  DBI::dbReadTable(conn, "ene")
+table_ene <-  DBI::dbReadTable(conn, "ene")
 ```
 
 --
@@ -314,7 +320,7 @@ background-image: url("imagenes/fondo2.PNG")
 background-size: contain;
 background-position: 100% 0%
 
-# Consultas por lote
+# Consultas por lotes
 
 `dbSendQuery` envía la consulta sin hacer fetch
 
@@ -322,6 +328,7 @@ background-position: 100% 0%
 sql_query <- dbSendQuery(conn, "SELECT COUNT(*) AS `contar` FROM `ene`")
 sql_query
 ```
+--
 
 Podemos hacer consultas por "lotes"
 
@@ -348,11 +355,11 @@ sql_query <- dbSendQuery(conn, "SELECT sexo, edad FROM `ene`")
 
 
 ```{r}
-contar <- 0
+count <- 0
 while (DBI::dbHasCompleted(sql_query) == FALSE ) {
   output <- dbFetch(sql_query, 20000) 
-  contar <- contar + 1
-  print(contar)
+  count <- count + 1
+  print(count)
 }
 
 ```
@@ -374,21 +381,202 @@ background-position: 100% 0%
 
 # dplyr al rescate
 
-.center[
-<img src="imagenes/dplyr-logo.png" width="300" />
+.pull-left[
+<img src="imagenes/dplyr-logo.png" width="150" />
 ]
 
 
+.pull-right[
+
 ```{r}
-tabla <- tbl(conn, "ene")
+connection <- tbl(conn, "ene")
 
-tabla %>% 
-  summarise(contar = n()) 
+connection %>% 
+  summarise(freq = n()) 
+```
 
+]
+
+--
+
+Con `show_query` podemos ver la traducción a SQL
+
+```{r}
+connection %>% 
+  summarise(freq = n()) %>% 
+  show_query()
+
+```
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Funcionamiento dbplyr 
+
+.pull-left[
+
+```{r}
+library(tictoc)
+tic()
+output <-  connection %>% 
+  filter(edad <= 25) %>% 
+  group_by(sexo) %>% 
+  summarise(freq = n()) 
+toc()
+```
+
+]
+
+.pull-right[
+
+```{r}
+
+tic()
+connection %>% 
+  filter(edad <= 25) %>% 
+  group_by(sexo) %>% 
+  summarise(freq = n()) 
+toc()
 
 
 ```
 
+]
+
+--
+
+### ¿Alguien tiene una idea de por qué el tiempo de ejecución es distinto?
+
+--
+
+.center[
+<img src="imagenes/lazy_bear.jpg" width="150" />
+]
+
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Evaluación lazy 
+
+La consulta funciona por detrás con `dbplyr` 
+
+`dbplyr` intenta retrasar la evaluación lo que más pueda 
+
+--
+
+El objeto `output` no es un `dataframe`, sino una conexión a la base de datos
+
+```{r}
+class(output)
+```
+
+--
+
+Con `collect` podemos traer la información desde la base de datos 
+
+```{r}
+output %>%
+  collect() %>% 
+  class()
+```
+
+--
+
+### Recuerda que el procesamiento se ejecuta en el servidor
+
+El resultado de la consulta no necesariamente entrará en tu memoria
+
+---
+
+class: inverse, center, middle
+
+# III. Creando nuestra propia base de datos 
+
+
+
+---
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Construyendo nuestra propia base de datos 
+
+Hasta el momento hemos consultado una base de datos
+
+--
+
+Estamos usando un usuario que solo tiene permisos de lectura
+
+```{r, error=TRUE}
+df <- data.frame(var1 = c(1:3), var2 = 4:6)
+DBI::dbCreateTable(conn, "ene2", df)
+```
+--
+
+```{r, error=TRUE}
+DBI::dbRemoveTable(conn, "ene")
+
+```
+
+
+--
+
+### Vamos a crear nuestra propia base de datos y prender fuego a todo
+
+
+.center[
+<img src="imagenes/terminator.jpeg" width="300" />
+]
+
+
+
+---
+
+
+---
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Otros temas 
+
+
+Despliegue de una bases de datos desde un contenedor (MariaDB, MySQL o PostgreSQL)
+
+.center[
+<img src="imagenes/logo_docker.png" width="250" />
+]
+
+--
+
+Exponer una base de datos a terceros 
+
+.center[
+
+
+<img src="imagenes/database_connection.png" width="250" />
+
+
+]
+
+--
+
+Cómo crear un servidor linux con Digital Ocean
+
+.pull-left[
+<img src="imagenes/logo_ubuntu.png" width="150" />
+]
+
+.pull-left[
+<img src="imagenes/logo_digital_ocean.png" width="150" />
+]
 
 ---
 

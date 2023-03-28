@@ -4,7 +4,7 @@
     <title>R and databases</title>
     <meta charset="utf-8" />
     <meta name="author" content="" />
-    <meta name="date" content="2023-03-27" />
+    <meta name="date" content="2023-03-28" />
     <script src="databases_files/header-attrs-2.17/header-attrs.js"></script>
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
@@ -65,7 +65,7 @@ background-position: 100% 0%
 
 **Objetivos de la clase:**
 
-- Habilitar a los estudiantes para trabajar con bases de datos desde R
+- Habilitar a los participantes para trabajar con bases de datos desde R
 
 
 ---
@@ -182,6 +182,12 @@ background-position: 100% 0%
 ]
 
 
+---
+
+class: inverse, center, middle
+
+# II. Conexión a una base de datos 
+
 
 ---
 
@@ -221,7 +227,7 @@ conn &lt;-  DBI::dbConnect(
 
 --
 
-### IMPORTANTE: SERVIDOR TESTING NO APTO PARA CONSULTAS PESADAS 
+### IMPORTANTE: Estamos en un servidor de prueba. Por favor, no sobrecargar 
 
 ---
 
@@ -264,8 +270,8 @@ Veamos el nombre de las columnas dentro de ene
 
 
 ```r
-columnas &lt;- DBI::dbListFields(conn, "ene")
-columnas
+columns &lt;- DBI::dbListFields(conn, "ene")
+columns
 ```
 
 ```
@@ -282,7 +288,7 @@ Podemos leer la tabla completa, sin embargo, no siempre es buena idea
 
 
 ```r
-tabla_ene &lt;-  DBI::dbReadTable(conn, "ene")
+table_ene &lt;-  DBI::dbReadTable(conn, "ene")
 ```
 
 --
@@ -327,7 +333,7 @@ background-image: url("imagenes/fondo2.PNG")
 background-size: contain;
 background-position: 100% 0%
 
-# Consultas por lote
+# Consultas por lotes
 
 `dbSendQuery` envía la consulta sin hacer fetch
 
@@ -343,6 +349,7 @@ sql_query
 ##   ROWS Fetched: 0 [incomplete]
 ##        Changed: 0
 ```
+--
 
 Podemos hacer consultas por "lotes"
 
@@ -389,11 +396,11 @@ sql_query &lt;- dbSendQuery(conn, "SELECT sexo, edad FROM `ene`")
 
 
 ```r
-contar &lt;- 0
+count &lt;- 0
 while (DBI::dbHasCompleted(sql_query) == FALSE ) {
   output &lt;- dbFetch(sql_query, 20000) 
-  contar &lt;- contar + 1
-  print(contar)
+  count &lt;- count + 1
+  print(count)
 }
 ```
 
@@ -422,27 +429,256 @@ background-position: 100% 0%
 
 # dplyr al rescate
 
-.center[
-&lt;img src="imagenes/dplyr-logo.png" width="300" /&gt;
+.pull-left[
+&lt;img src="imagenes/dplyr-logo.png" width="150" /&gt;
 ]
 
 
+.pull-right[
+
 
 ```r
-tabla &lt;- tbl(conn, "ene")
+connection &lt;- tbl(conn, "ene")
 
-tabla %&gt;% 
-  summarise(contar = n()) 
+connection %&gt;% 
+  summarise(freq = n()) 
 ```
 
 ```
 ## # Source:   SQL [1 x 1]
 ## # Database: mysql  [reader@143.198.79.143:NA/ine]
-##    contar
+##      freq
 ##   &lt;int64&gt;
 ## 1   94042
 ```
 
+]
+
+--
+
+Con `show_query` podemos ver la traducción a SQL
+
+
+```r
+connection %&gt;% 
+  summarise(freq = n()) %&gt;% 
+  show_query()
+```
+
+```
+## &lt;SQL&gt;
+## SELECT COUNT(*) AS `freq`
+## FROM `ene`
+```
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Funcionamiento dbplyr 
+
+.pull-left[
+
+
+```r
+library(tictoc)
+tic()
+output &lt;-  connection %&gt;% 
+  filter(edad &lt;= 25) %&gt;% 
+  group_by(sexo) %&gt;% 
+  summarise(freq = n()) 
+toc()
+```
+
+```
+## 0.005 sec elapsed
+```
+
+]
+
+.pull-right[
+
+
+```r
+tic()
+connection %&gt;% 
+  filter(edad &lt;= 25) %&gt;% 
+  group_by(sexo) %&gt;% 
+  summarise(freq = n()) 
+```
+
+```
+## # Source:   SQL [2 x 2]
+## # Database: mysql  [reader@143.198.79.143:NA/ine]
+##   sexo     freq
+##   &lt;chr&gt; &lt;int64&gt;
+## 1 1       15652
+## 2 2       14986
+```
+
+```r
+toc()
+```
+
+```
+## 0.997 sec elapsed
+```
+
+]
+
+--
+
+### ¿Alguien tiene una idea de por qué el tiempo de ejecución es distinto?
+
+--
+
+.center[
+&lt;img src="imagenes/lazy_bear.jpg" width="150" /&gt;
+]
+
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Evaluación lazy 
+
+La consulta funciona por detrás con `dbplyr` 
+
+`dbplyr` intenta retrasar la evaluación lo que más pueda 
+
+--
+
+El objeto `output` no es un `dataframe`, sino una conexión a la base de datos
+
+
+```r
+class(output)
+```
+
+```
+## [1] "tbl_MariaDBConnection" "tbl_dbi"               "tbl_sql"              
+## [4] "tbl_lazy"              "tbl"
+```
+
+--
+
+Con `collect` podemos traer la información desde la base de datos 
+
+
+```r
+output %&gt;%
+  collect() %&gt;% 
+  class()
+```
+
+```
+## [1] "tbl_df"     "tbl"        "data.frame"
+```
+
+--
+
+### Recuerda que el procesamiento se ejecuta en el servidor
+
+El resultado de la consulta no necesariamente entrará en tu memoria
+
+---
+
+class: inverse, center, middle
+
+# III. Creando nuestra propia base de datos 
+
+
+
+---
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Construyendo nuestra propia base de datos 
+
+Hasta el momento hemos consultado una base de datos
+
+--
+
+Estamos usando un usuario que solo tiene permisos de lectura
+
+
+```r
+df &lt;- data.frame(var1 = c(1:3), var2 = 4:6)
+DBI::dbCreateTable(conn, "ene2", df)
+```
+
+```
+## Error: CREATE command denied to user 'reader'@'186.105.39.203' for table `ine`.`ene2` [1142]
+```
+--
+
+
+```r
+DBI::dbRemoveTable(conn, "ene")
+```
+
+```
+## Error: DROP command denied to user 'reader'@'186.105.39.203' for table `ine`.`ene` [1142]
+```
+
+
+--
+
+### Vamos a crear nuestra propia base de datos y prender fuego a todo
+
+
+.center[
+&lt;img src="imagenes/terminator.jpeg" width="300" /&gt;
+]
+
+
+
+---
+
+
+---
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Otros temas 
+
+
+Despliegue de una bases de datos desde un contenedor (MariaDB, MySQL o PostgreSQL)
+
+.center[
+&lt;img src="imagenes/logo_docker.png" width="250" /&gt;
+]
+
+--
+
+Exponer una base de datos a terceros 
+
+.center[
+
+
+&lt;img src="imagenes/database_connection.png" width="250" /&gt;
+
+
+]
+
+--
+
+Cómo crear un servidor linux con Digital Ocean
+
+.pull-left[
+&lt;img src="imagenes/logo_ubuntu.png" width="150" /&gt;
+]
+
+.pull-left[
+&lt;img src="imagenes/logo_digital_ocean.png" width="150" /&gt;
+]
 
 ---
 
