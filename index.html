@@ -4,7 +4,7 @@
     <title>R and databases</title>
     <meta charset="utf-8" />
     <meta name="author" content="" />
-    <meta name="date" content="2023-03-28" />
+    <meta name="date" content="2023-03-29" />
     <script src="databases_files/header-attrs-2.17/header-attrs.js"></script>
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
@@ -493,7 +493,7 @@ toc()
 ```
 
 ```
-## 0.005 sec elapsed
+## 0.004 sec elapsed
 ```
 
 ]
@@ -523,7 +523,7 @@ toc()
 ```
 
 ```
-## 0.997 sec elapsed
+## 1.112 sec elapsed
 ```
 
 ]
@@ -582,15 +582,43 @@ output %&gt;%
 
 --
 
-### Recuerda que el procesamiento se ejecuta en el servidor
+### Recuerda que la consulta se ejecuta en el servidor
 
 El resultado de la consulta no necesariamente entrará en tu memoria
 
+
 ---
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
 
-class: inverse, center, middle
+# Ejercicio 
 
-# III. Creando nuestra propia base de datos 
+Queremos calcular la cantidad de ocupados para cada una de las regiones del país usando el factor de expansión.
+
+
+
+```r
+dbListFields(conn, "ene")
+```
+
+```
+##  [1] "idrph"               "region"              "provincia"          
+##  [4] "mes_central"         "id_identificacion"   "ano_encuesta"       
+##  [7] "estrato"             "fact_cal"            "sexo"               
+## [10] "edad"                "cae_especifico"      "activ"              
+## [13] "categoria_ocupacion" "habituales"          "efectivas"
+```
+
+```r
+ene_data &lt;-  tbl(conn, "ene")
+
+df &lt;- ene_data %&gt;% 
+  filter(activ == 1) %&gt;% 
+  group_by(region) %&gt;% 
+  summarize(total = sum(fact_cal) ) %&gt;% 
+  collect()
+```
 
 
 
@@ -599,7 +627,36 @@ background-image: url("imagenes/fondo2.PNG")
 background-size: contain;
 background-position: 100% 0%
 
-# Construyendo nuestra propia base de datos 
+# Ejercicio 
+
+Para ver la consulta en SQL, usamos `show_query`
+
+
+```r
+ene_data %&gt;% 
+  filter(activ == 1) %&gt;% 
+  group_by(region) %&gt;% 
+  summarize(total = sum(fact_cal) ) %&gt;% 
+  show_query()
+```
+
+```
+## &lt;SQL&gt;
+## SELECT `region`, SUM(`fact_cal`) AS `total`
+## FROM `ene`
+## WHERE (`activ` = 1.0)
+## GROUP BY `region`
+```
+--
+
+### Podemos ir aprendiendo SQL de manera pausada
+
+---
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Resumiendo... 
 
 Hasta el momento hemos consultado una base de datos
 
@@ -614,7 +671,7 @@ DBI::dbCreateTable(conn, "ene2", df)
 ```
 
 ```
-## Error: CREATE command denied to user 'reader'@'186.105.39.203' for table `ine`.`ene2` [1142]
+## Error: CREATE command denied to user 'reader'@'191.126.227.43' for table `ine`.`ene2` [1142]
 ```
 --
 
@@ -624,7 +681,7 @@ DBI::dbRemoveTable(conn, "ene")
 ```
 
 ```
-## Error: DROP command denied to user 'reader'@'186.105.39.203' for table `ine`.`ene` [1142]
+## Error: DROP command denied to user 'reader'@'191.126.227.43' for table `ine`.`ene` [1142]
 ```
 
 
@@ -641,13 +698,265 @@ DBI::dbRemoveTable(conn, "ene")
 
 ---
 
+class: inverse, center, middle
+
+# III. Creando nuestra propia base de datos 
+
+
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Creando nuestra base de datos 
+
+Este código genera un archivo sqlite
+
+
+```r
+library(RSQLite)
+my_db_file &lt;- "data/my_db.sqlite"
+new_conn &lt;- dbConnect(RSQLite::SQLite(), my_db_file)
+```
+
+--
+
+También podemos crear una base que viva en la memoria
+
+
+```r
+library(RSQLite)
+new_conn2 &lt;- dbConnect(RSQLite::SQLite(), ":memory:")
+DBI::dbDisconnect(new_conn2)
+```
+
+--
+
+
+
+
+
+Veamos que contiene nuestra base de datos
+
+
+```r
+dbListTables(new_conn)
+```
+
+```
+## character(0)
+```
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Poblando la base de datos 
+
+Usaremos información de la base inicial 
+
+
+```r
+sex_frequency &lt;-  output %&gt;%
+  collect() 
+sex_frequency
+```
+
+```
+## # A tibble: 2 × 2
+##   sexo     freq
+##   &lt;chr&gt; &lt;int64&gt;
+## 1 1       15652
+## 2 2       14986
+```
+
+--
+
+
+
+```r
+dbCreateTable(new_conn, name = "sex_frequency", fields = sex_frequency)
+dbListTables(new_conn)
+```
+
+```
+## [1] "sex_frequency"
+```
+
+Podemos ver que nuestra tabla existe 😄
+
+--
+
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Poblando la base de datos 
+
+### Hagamos una prueba...
+
+
+```r
+dbReadTable(new_conn, "sex_frequency")
+```
+
+```
+## [1] sexo freq
+## &lt;0 rows&gt; (or 0-length row.names)
+```
+
+### Algo no salió bien 😔
+
+
 
 ---
 background-image: url("imagenes/fondo2.PNG")
 background-size: contain;
 background-position: 100% 0%
 
-# Otros temas 
+# Poblando la base de datos 
+
+Si consultamos por las columnas de la tabla, podemos ver que estas existen
+
+
+```r
+dbListFields(new_conn, "sex_frequency")
+```
+
+```
+## [1] "sexo" "freq"
+```
+Significa que creamos una tabla, pero esta aun no tiene datos 
+
+--
+
+Escribamos en nuestra tabla los datos de frecuencia
+
+
+```r
+dbAppendTable(new_conn, name = "sex_frequency", value = sex_frequency )
+```
+
+```
+## [1] 2
+```
+
+--
+
+
+```r
+dbReadTable(new_conn, "sex_frequency")
+```
+
+```
+##   sexo  freq
+## 1    1 15652
+## 2    2 14986
+```
+
+### ¡Ahí están nuestros datos!
+
+---
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Editando la base de datos 
+
+Dado que ahora tenemos permisos de edición, podemos agregar filas 
+
+
+```r
+dbAppendTable(new_conn, "sex_frequency", data.frame(sexo = 3, freq = 9))
+```
+
+```
+## [1] 1
+```
+
+```r
+dbReadTable(new_conn, "sex_frequency")
+```
+
+```
+##   sexo  freq
+## 1    1 15652
+## 2    2 14986
+## 3  3.0     9
+```
+
+--
+
+Podemos encadenar algún proceso sistemático en R a nuestra base de datos 😎 
+
+--
+
+También podemos eliminar tablas, pero esto debe hacerse con cuidado
+
+
+```r
+dbRemoveTable(new_conn, "sex_frequency")
+```
+
+.center[
+&lt;img src="imagenes/danger_zone.jpeg" width="150" /&gt;
+]
+
+
+---
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Permisos
+
+Al trabajar con varios usuarios, es importante definir claramente los privilegios
+
+--
+
+Las bases de datos permiten establecer permisos muy específicos
+
+- select
+- insert
+- update
+- delete
+- drop
+- etc
+
+Estos permisos podemos asignarlos para cada tabla o esquema
+
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Para terminar...
+
+Para desconectarnos, usamos dbDisconnect()
+
+
+```r
+DBI::dbDisconnect(conn)
+DBI::dbDisconnect(new_conn)
+```
+
+
+
+---
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Otros temas relacionados
 
 
 Despliegue de una bases de datos desde un contenedor (MariaDB, MySQL o PostgreSQL)
@@ -676,8 +985,8 @@ Cómo crear un servidor linux con Digital Ocean
 &lt;img src="imagenes/logo_ubuntu.png" width="150" /&gt;
 ]
 
-.pull-left[
-&lt;img src="imagenes/logo_digital_ocean.png" width="150" /&gt;
+.pull-right[
+&lt;img src="imagenes/logo_digital_ocean.png" width="130" /&gt;
 ]
 
 ---

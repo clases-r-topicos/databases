@@ -489,15 +489,32 @@ output %>%
 
 --
 
-### Recuerda que el procesamiento se ejecuta en el servidor
+### Recuerda que la consulta se ejecuta en el servidor
 
 El resultado de la consulta no necesariamente entrará en tu memoria
 
+
 ---
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
 
-class: inverse, center, middle
+# Ejercicio 
 
-# III. Creando nuestra propia base de datos 
+Queremos calcular la cantidad de ocupados para cada una de las regiones del país usando el factor de expansión.
+
+
+```{r}
+dbListFields(conn, "ene")
+
+ene_data <-  tbl(conn, "ene")
+
+df <- ene_data %>% 
+  filter(activ == 1) %>% 
+  group_by(region) %>% 
+  summarize(total = sum(fact_cal) ) %>% 
+  collect()
+```
 
 
 
@@ -506,7 +523,27 @@ background-image: url("imagenes/fondo2.PNG")
 background-size: contain;
 background-position: 100% 0%
 
-# Construyendo nuestra propia base de datos 
+# Ejercicio 
+
+Para ver la consulta en SQL, usamos `show_query`
+
+```{r}
+ene_data %>% 
+  filter(activ == 1) %>% 
+  group_by(region) %>% 
+  summarize(total = sum(fact_cal) ) %>% 
+  show_query()
+```
+--
+
+### Podemos ir aprendiendo SQL de manera pausada
+
+---
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Resumiendo... 
 
 Hasta el momento hemos consultado una base de datos
 
@@ -539,13 +576,213 @@ DBI::dbRemoveTable(conn, "ene")
 
 ---
 
+class: inverse, center, middle
+
+# III. Creando nuestra propia base de datos 
+
+
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Creando nuestra base de datos 
+
+Este código genera un archivo sqlite
+
+```{r}
+library(RSQLite)
+my_db_file <- "data/my_db.sqlite"
+new_conn <- dbConnect(RSQLite::SQLite(), my_db_file)
+
+
+```
+
+--
+
+También podemos crear una base que viva en la memoria
+
+```{r}
+library(RSQLite)
+new_conn2 <- dbConnect(RSQLite::SQLite(), ":memory:")
+DBI::dbDisconnect(new_conn2)
+```
+
+--
+
+
+```{r, echo=FALSE}
+if (DBI::dbExistsTable(new_conn, "sex_frequency")) {
+  DBI::dbRemoveTable(new_conn, "sex_frequency")
+} 
+```
+
+
+Veamos que contiene nuestra base de datos
+
+```{r}
+dbListTables(new_conn)
+
+```
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Poblando la base de datos 
+
+Usaremos información de la base inicial 
+
+```{r}
+sex_frequency <-  output %>%
+  collect() 
+sex_frequency
+```
+
+--
+
+
+```{r}
+dbCreateTable(new_conn, name = "sex_frequency", fields = sex_frequency)
+dbListTables(new_conn)
+
+```
+
+Podemos ver que nuestra tabla existe 😄
+
+--
+
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Poblando la base de datos 
+
+### Hagamos una prueba...
+
+```{r}
+dbReadTable(new_conn, "sex_frequency")
+```
+
+### Algo no salió bien 😔
+
+
 
 ---
 background-image: url("imagenes/fondo2.PNG")
 background-size: contain;
 background-position: 100% 0%
 
-# Otros temas 
+# Poblando la base de datos 
+
+Si consultamos por las columnas de la tabla, podemos ver que estas existen
+
+```{r}
+dbListFields(new_conn, "sex_frequency")
+```
+Significa que creamos una tabla, pero esta aun no tiene datos 
+
+--
+
+Escribamos en nuestra tabla los datos de frecuencia
+
+```{r}
+dbAppendTable(new_conn, name = "sex_frequency", value = sex_frequency )
+```
+
+--
+
+```{r}
+dbReadTable(new_conn, "sex_frequency")
+```
+
+### ¡Ahí están nuestros datos!
+
+---
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Editando la base de datos 
+
+Dado que ahora tenemos permisos de edición, podemos agregar filas 
+
+```{r}
+dbAppendTable(new_conn, "sex_frequency", data.frame(sexo = 3, freq = 9))
+dbReadTable(new_conn, "sex_frequency")
+
+```
+
+--
+
+Podemos encadenar algún proceso sistemático en R a nuestra base de datos 😎 
+
+--
+
+También podemos eliminar tablas, pero esto debe hacerse con cuidado
+
+```{r, eval=FALSE}
+dbRemoveTable(new_conn, "sex_frequency")
+```
+
+.center[
+<img src="imagenes/danger_zone.jpeg" width="150" />
+]
+
+
+---
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Permisos
+
+Al trabajar con varios usuarios, es importante definir claramente los privilegios
+
+--
+
+Las bases de datos permiten establecer permisos muy específicos
+
+- select
+- insert
+- update
+- delete
+- drop
+- etc
+
+Estos permisos podemos asignarlos para cada tabla o esquema
+
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Para terminar...
+
+Para desconectarnos, usamos dbDisconnect()
+
+```{r}
+DBI::dbDisconnect(conn)
+DBI::dbDisconnect(new_conn)
+```
+
+
+
+---
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Otros temas relacionados
 
 
 Despliegue de una bases de datos desde un contenedor (MariaDB, MySQL o PostgreSQL)
@@ -574,8 +811,8 @@ Cómo crear un servidor linux con Digital Ocean
 <img src="imagenes/logo_ubuntu.png" width="150" />
 ]
 
-.pull-left[
-<img src="imagenes/logo_digital_ocean.png" width="150" />
+.pull-right[
+<img src="imagenes/logo_digital_ocean.png" width="130" />
 ]
 
 ---
