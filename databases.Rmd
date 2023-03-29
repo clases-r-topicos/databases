@@ -501,7 +501,7 @@ background-position: 100% 0%
 
 # Ejercicio 
 
-Queremos calcular la cantidad de ocupados para cada una de las regiones del país usando el factor de expansión.
+Queremos calcular la cantidad de ocupados para cada una de las regiones del país usando el factor de expansión.  
 
 
 ```{r}
