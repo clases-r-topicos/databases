@@ -332,6 +332,11 @@ table,  td {
 }
 
 
+.small .remark-code  {
+  font-size: 70%;
+}
+
+
 /*
 
 <script>

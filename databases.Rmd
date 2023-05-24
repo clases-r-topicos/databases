@@ -22,11 +22,11 @@ class: center, middle
 
 <img src="imagenes/logo_portada2.png" width="200" />
 
-## Capacitación en R y herramientas de productividad - Bases de datos
+## INE Educa: Clases abiertas de R
 
-## Proyecto Estratégico Metodologías y Ciencia de Datos para la Producción Estadística
+## Proyecto Ciencia de Datos
 
-### Abril 2023
+### Mayo 2023
 
 ```{r setup, include=FALSE}
 options(htmltools.dir.version = TRUE)
@@ -37,6 +37,25 @@ options(scipen = "999")
 ```{r xaringan-themer, include=FALSE, warning=FALSE}
 library(xaringanthemer)
 ```
+
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+
+# Motivación de la actividad
+
+
+.center[
+
+
+<img src="imagenes/usos_r.png" width="800" />
+
+
+]
 
 ---
 
@@ -50,6 +69,10 @@ background-position: 100% 0%
 **Contenidos de la clase**
 
 - Motivación
+
+--
+
+- ¿Por qué trabajar con bases de datos? 
 
 --
 
@@ -71,10 +94,11 @@ background-position: 100% 0%
 
 - Consultar nuestra propia base de datos
 
+--
 
 **Objetivos de la clase:**
 
-- Habilitar a los participantes para trabajar con bases de datos desde R
+- Mostrar a los y las participantes cómo interactuar con una base de datos desde R 
 
 
 ---
@@ -104,6 +128,12 @@ background-position: 100% 0%
 
 ### Como analistas, debemos ser capaces de trabajar con esos datos
 
+--
+
+### Las aplicaciones en general utilizan bases de datos
+
+`Shiny` no es la excepción (*sesión 2*)
+
 ---
 
 background-image: url("imagenes/fondo2.PNG")
@@ -130,6 +160,11 @@ background-position: 100% 0%
 
 Si quieres saber más sobre el mundo NoSql, puedes partir por [wikipedia](https://es.wikipedia.org/wiki/NoSQL) 
 
+--
+
+**¡Advertencia!: Esta no es una clase sobre bases de datos**
+
+
 ---
 
 
@@ -143,9 +178,38 @@ Colección de tablas relacionadas por un campo común (key)
 
 --
 
-Un archivo csv **NO** es una base de datos  
+Archivos csv, dta (Stata) o sav (SPSS) **NO** son bases de datos relacionales  
 
 --
+
+Coloquialmente, usamos el concepto "base de datos" para referirnos a esto     
+
+--
+
+.center[
+
+
+<img src="imagenes/planilla_excel.png" width="600" />
+
+
+]
+
+
+
+---
+
+
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# ¿Qué es una base de datos relacional?
+
+**Aclaremos un poco más**
+
+--
+
 
 **Las tablas se parecen a los dataframes**
 
@@ -161,13 +225,28 @@ Un archivo csv **NO** es una base de datos
 
 
 ---
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# ¿Cómo se ve una base de datos?
+
+.center[
+
+
+<img src="imagenes/database_tables.png" width="900" />
+
+
+]
+
+---
 
 
 background-image: url("imagenes/fondo2.PNG")
 background-size: contain;
 background-position: 100% 0%
 
-# Algunas bases de datos populares
+# Gestores populares de bases de datos 
 
 
 .center[
@@ -191,7 +270,9 @@ background-position: 100% 0%
 ]
 
 
+
 ---
+
 
 class: inverse, center, middle
 
@@ -214,18 +295,28 @@ library(DBI)
 library(dplyr)
 ```
 
-```{r}
+```{r, eval=FALSE}
 conn <-  DBI::dbConnect(
   drv =  RMariaDB::MariaDB(),
   dbname = "ine", # nombre de la base de datos
   host =   "143.198.79.143" , # IP del servidor
   port =   1111, # puerto
-  password = "roscalata", #  pass
+  password = "XXXXXXXXXX", #  pass
   user = "reader" #  solo permiso de lectura
 )
 
 ```
+```{r, eval=TRUE, echo=FALSE}
+conn <-  DBI::dbConnect(
+  drv =  RMariaDB::MariaDB(),
+  dbname = "ine", # nombre de la base de datos
+  host =   "143.198.79.143" , # IP del servidor
+  port =   1111, # puerto
+  password = Sys.getenv("pass"), #  pass
+  user = "reader" #  solo permiso de lectura
+)
 
+```
 
 .center[
 
@@ -233,9 +324,6 @@ conn <-  DBI::dbConnect(
 
 ]
 
---
-
-### IMPORTANTE: Estamos en un servidor de prueba. Por favor, no sobrecargar 
 
 ---
 
@@ -324,14 +412,19 @@ background-position: 100% 0%
 
 `dbSendQuery` envía la consulta sin hacer fetch
 
+.small[
+
 ```{r}
 sql_query <- dbSendQuery(conn, "SELECT COUNT(*) AS `contar` FROM `ene`")
 sql_query
 ```
+]
+
 --
 
 Podemos hacer consultas por "lotes"
 
+.small[
 ```{r}
 sql_query <- dbSendQuery(conn, "SELECT sexo, edad FROM `ene`")
 output1 <- dbFetch(sql_query, 10) 
@@ -342,6 +435,8 @@ output3 <- dbFetch(sql_query, 94023)
 DBI::dbHasCompleted(sql_query) 
 
 ```
+
+]
 ---
 background-image: url("imagenes/fondo2.PNG")
 background-size: contain;
@@ -389,6 +484,7 @@ background-position: 100% 0%
 .pull-right[
 
 ```{r}
+library(dplyr)
 connection <- tbl(conn, "ene")
 
 connection %>% 
@@ -448,7 +544,7 @@ toc()
 
 --
 
-### ¿Alguien tiene una idea de por qué el tiempo de ejecución es distinto?
+### ¿Por qué el tiempo de ejecución es tan distinto?
 
 --
 
@@ -523,7 +619,7 @@ background-image: url("imagenes/fondo2.PNG")
 background-size: contain;
 background-position: 100% 0%
 
-# Ejercicio 
+# Demostración 
 
 Para ver la consulta en SQL, usamos `show_query`
 
@@ -620,7 +716,7 @@ if (DBI::dbExistsTable(new_conn, "sex_frequency")) {
 ```
 
 
-Veamos que contiene nuestra base de datos
+Veamos qué contiene nuestra base de datos
 
 ```{r}
 dbListTables(new_conn)
@@ -784,11 +880,24 @@ background-position: 100% 0%
 
 # Otros temas relacionados
 
-
+.pull-left[
 Despliegue de una bases de datos desde un contenedor (MariaDB, MySQL o PostgreSQL)
+
 
 .center[
 <img src="imagenes/logo_docker.png" width="250" />
+]
+
+]
+
+--
+
+.pull-right[
+Conexión mediante algún IDE
+
+<img src="imagenes/workbench.png" width="300" />
+
+
 ]
 
 --
@@ -798,22 +907,15 @@ Exponer una base de datos a terceros
 .center[
 
 
-<img src="imagenes/database_connection.png" width="250" />
+<img src="imagenes/database_connection.png" width="350" />
 
 
 ]
 
---
 
-Cómo crear un servidor linux con Digital Ocean
 
-.pull-left[
-<img src="imagenes/logo_ubuntu.png" width="150" />
-]
 
-.pull-right[
-<img src="imagenes/logo_digital_ocean.png" width="130" />
-]
+
 
 ---
 
@@ -824,8 +926,9 @@ class: center, middle
 
 <img src="imagenes/logo_portada2.png" width="200" />
 
-## Capacitación en R y herramientas de productividad - bases de datos
 
-## Proyecto Estratégico Metodologías y Ciencia de Datos para la Producción Estadística
+## INE Educa: Clases abiertas de R
 
-### Abril 2023
+## Proyecto Ciencia de Datos
+
+### Mayo 2023
