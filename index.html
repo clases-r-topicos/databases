@@ -4,7 +4,7 @@
     <title>R and databases</title>
     <meta charset="utf-8" />
     <meta name="author" content="" />
-    <meta name="date" content="2023-05-24" />
+    <meta name="date" content="2023-05-26" />
     <script src="databases_files/header-attrs-2.21/header-attrs.js"></script>
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
@@ -47,6 +47,29 @@ background-position: 100% 0%
 
 
 ]
+
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+
+# Gracias por el interés
+
+
+
+
+
+.center[
+
+
+&lt;img src="imagenes/wordcloud.png" width="700" /&gt;
+
+
+]
+
 
 ---
 
@@ -579,7 +602,7 @@ toc()
 ```
 
 ```
-## 0.033 sec elapsed
+## 0.023 sec elapsed
 ```
 
 ]
@@ -609,7 +632,7 @@ toc()
 ```
 
 ```
-## 1.046 sec elapsed
+## 0.916 sec elapsed
 ```
 
 ]
@@ -757,7 +780,7 @@ DBI::dbCreateTable(conn, "ene2", df)
 ```
 
 ```
-## Error: CREATE command denied to user 'reader'@'191.126.99.168' for table `ine`.`ene2` [1142]
+## Error: CREATE command denied to user 'reader'@'163.247.84.4' for table `ine`.`ene2` [1142]
 ```
 --
 
@@ -767,7 +790,7 @@ DBI::dbRemoveTable(conn, "ene")
 ```
 
 ```
-## Error: DROP command denied to user 'reader'@'191.126.99.168' for table `ine`.`ene` [1142]
+## Error: DROP command denied to user 'reader'@'163.247.84.4' for table `ine`.`ene` [1142]
 ```
 
 

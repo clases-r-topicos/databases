@@ -57,6 +57,53 @@ background-position: 100% 0%
 
 ]
 
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+
+# Gracias por el interés
+
+```{r, echo=FALSE}
+library(wordcloud2)
+library(quanteda)
+library(readxl)
+library(quanteda.textstats)
+library(quanteda.textplots)
+library(dplyr)
+
+comments = read_excel("data/comentarios.xlsx")
+names(comments) = "text"
+
+words <- corpus(comments) %>% 
+  tokens(remove_punct = TRUE, remove_numbers = TRUE) %>% 
+  tokens_select(pattern = stopwords("es"), selection = "remove") %>% 
+  tokens_ngrams(2) %>% 
+  dfm() %>% 
+  textstat_frequency(n = 1000) %>% 
+  rename(word = feature,
+         freq = frequency)
+
+
+wc <- wordcloud2(words, size=1.1, color='random-dark')
+
+
+```
+
+
+
+.center[
+
+
+<img src="imagenes/wordcloud.png" width="700" />
+
+
+]
+
+
 ---
 
 background-image: url("imagenes/fondo2.PNG")
