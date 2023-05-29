@@ -1,26 +1,23 @@
----
-title: "R and databases"
-subtitle: "calidad"
-author: 
-date: '`r Sys.Date()`'
-output:
-  xaringan::moon_reader:
-    seal: false
-    #lib_dir: libs
-    css: xaringan-themer.css
-    nature:
-      highlightStyle: github
-      highlightLines: true
-      countIncrementalSlides: False
-      ratio: '13:9'
----
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>R and databases</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="" />
+    <meta name="date" content="2023-05-29" />
+    <script src="databases_files/header-attrs-2.21/header-attrs.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
 
 class: center, middle
 
 .linea-superior[]
 .linea-inferior[]
 
-<img src="imagenes/logo_portada2.png" width="200" />
+&lt;img src="imagenes/logo_portada2.png" width="200" /&gt;
 
 ## INE Educa: Clases abiertas de R
 
@@ -28,15 +25,9 @@ class: center, middle
 
 ### Mayo 2023
 
-```{r setup, include=FALSE}
-options(htmltools.dir.version = TRUE)
-knitr::opts_chunk$set(message = FALSE, warning = F, eval = T) 
-options(scipen = "999")
-```
 
-```{r xaringan-themer, include=FALSE, warning=FALSE}
-library(xaringanthemer)
-```
+
+
 
 
 
@@ -49,38 +40,14 @@ background-position: 100% 0%
 
 # Gracias por el interés
 
-```{r, echo=FALSE}
-library(wordcloud2)
-library(quanteda)
-library(readxl)
-library(quanteda.textstats)
-library(quanteda.textplots)
-library(dplyr)
 
-comments = read_excel("data/comentarios.xlsx")
-names(comments) = "text"
-
-words <- corpus(comments) %>% 
-  tokens(remove_punct = TRUE, remove_numbers = TRUE) %>% 
-  tokens_select(pattern = stopwords("es"), selection = "remove") %>% 
-  tokens_ngrams(2) %>% 
-  dfm() %>% 
-  textstat_frequency(n = 1000) %>% 
-  rename(word = feature,
-         freq = frequency)
-
-
-wc <- wordcloud2(words, size=1.1, color='random-dark')
-
-
-```
 
 
 
 .center[
 
 
-<img src="imagenes/wordcloud.png" width="700" />
+&lt;img src="imagenes/wordcloud.png" width="700" /&gt;
 
 
 ]
@@ -100,7 +67,7 @@ background-position: 100% 0%
 .center[
 
 
-<img src="imagenes/usos_r.png" width="750" />
+&lt;img src="imagenes/usos_r.png" width="750" /&gt;
 
 
 ]
@@ -124,7 +91,7 @@ background-position: 100% 0%
 
 
 .center[
-<img src="imagenes/diana.png" width="400" />
+&lt;img src="imagenes/diana.png" width="400" /&gt;
 
 ### Público objetivo: Usuarios y usuarias intermedios de R
 
@@ -156,7 +123,7 @@ background-position: 100% 0%
 .center[
 
 
-<img src="imagenes/database_connection.png" width="500" />
+&lt;img src="imagenes/database_connection.png" width="500" /&gt;
 
 
 ]
@@ -187,7 +154,7 @@ background-position: 100% 0%
 .center[
 
 
-<img src="imagenes/sql_vs_nosql.jpg" width="600" />
+&lt;img src="imagenes/sql_vs_nosql.jpg" width="600" /&gt;
 
 
 ]
@@ -230,7 +197,7 @@ Coloquialmente, usamos el concepto "base de datos" para referirnos a esto
 .center[
 
 
-<img src="imagenes/planilla_excel.png" width="600" />
+&lt;img src="imagenes/planilla_excel.png" width="600" /&gt;
 
 
 ]
@@ -246,7 +213,7 @@ background-position: 100% 0%
 .center[
 
 
-<img src="imagenes/database_tables.png" width="900" />
+&lt;img src="imagenes/database_tables.png" width="900" /&gt;
 
 
 ]
@@ -296,7 +263,7 @@ background-position: 100% 0%
 
 .center[
 
-<img src="imagenes/databases_logos.png" width="600" />
+&lt;img src="imagenes/databases_logos.png" width="600" /&gt;
 
 ]
 
@@ -307,7 +274,7 @@ background-position: 100% 0%
 
 --
 
-<br>
+&lt;br&gt;
 
 .center[
 
@@ -335,13 +302,15 @@ background-position: 100% 0%
 
 Vamos a conectarnos a una base que contiene datos de la Encuesta Nacional de Empleo (ENE) para varios trimestres
 
-```{r}
+
+```r
 library(DBI)
 library(dplyr)
 ```
 
-```{r, eval=FALSE}
-conn <-  DBI::dbConnect(
+
+```r
+conn &lt;-  DBI::dbConnect(
   drv =  RMariaDB::MariaDB(),
   dbname = "ine", # nombre de la base de datos
   host =   "143.198.79.143" , # IP del servidor
@@ -349,23 +318,12 @@ conn <-  DBI::dbConnect(
   password = "XXXXXXXXXX", #  pass
   user = "reader" #  solo permiso de lectura
 )
-
 ```
-```{r, eval=TRUE, echo=FALSE}
-conn <-  DBI::dbConnect(
-  drv =  RMariaDB::MariaDB(),
-  dbname = "ine", # nombre de la base de datos
-  host =   "143.198.79.143" , # IP del servidor
-  port =   1111, # puerto
-  password = Sys.getenv("pass"), #  pass
-  user = "reader" #  solo permiso de lectura
-)
 
-```
 
 .center[
 
-<img src="https://media.giphy.com/media/3o7buirYcmV5nSwIRW/giphy.gif" width="250" />
+&lt;img src="https://media.giphy.com/media/3o7buirYcmV5nSwIRW/giphy.gif" width="250" /&gt;
 
 ]
 
@@ -380,7 +338,7 @@ background-position: 100% 0%
 
 .center[
 
-<img src="imagenes/port_example.png" width="600" />
+&lt;img src="imagenes/port_example.png" width="600" /&gt;
 
 ]
 
@@ -396,25 +354,40 @@ background-position: 100% 0%
 
 Listemos las tablas dentro de la base de datos
 
-```{r}
+
+```r
 DBI::dbListTables(conn)
+```
+
+```
+## [1] "ene"
 ```
 
 --
 
 Veamos el nombre de las columnas dentro de ene
 
-```{r}
-columns <- DBI::dbListFields(conn, "ene")
+
+```r
+columns &lt;- DBI::dbListFields(conn, "ene")
 columns
+```
+
+```
+##  [1] "idrph"               "region"              "provincia"          
+##  [4] "mes_central"         "id_identificacion"   "ano_encuesta"       
+##  [7] "estrato"             "fact_cal"            "sexo"               
+## [10] "edad"                "cae_especifico"      "activ"              
+## [13] "categoria_ocupacion" "habituales"          "efectivas"
 ```
 
 --
 
 Podemos leer la tabla completa, sin embargo, no siempre es buena idea
 
-```{r, eval=FALSE}
-table_ene <-  DBI::dbReadTable(conn, "ene")
+
+```r
+table_ene &lt;-  DBI::dbReadTable(conn, "ene")
 ```
 
 --
@@ -433,13 +406,19 @@ background-position: 100% 0%
 
 Contemos el número de filas que tiene la tabla
 
-```{r}
-sql_output_df <- dbGetQuery(conn, "SELECT COUNT(*) AS `contar` FROM `ene`")
+
+```r
+sql_output_df &lt;- dbGetQuery(conn, "SELECT COUNT(*) AS `contar` FROM `ene`")
 sql_output_df
 ```
 
+```
+##   contar
+## 1  94042
+```
 
-Podemos ver que la tabla contiene `r as.character(sql_output_df$contar[1])`
+
+Podemos ver que la tabla contiene 94042
 
 No es tan buena idea pedir la tabla completa
 
@@ -459,9 +438,17 @@ background-position: 100% 0%
 
 .small[
 
-```{r}
-sql_query <- dbSendQuery(conn, "SELECT COUNT(*) AS `contar` FROM `ene`")
+
+```r
+sql_query &lt;- dbSendQuery(conn, "SELECT COUNT(*) AS `contar` FROM `ene`")
 sql_query
+```
+
+```
+## &lt;MariaDBResult&gt;
+##   SQL  SELECT COUNT(*) AS `contar` FROM `ene`
+##   ROWS Fetched: 0 [incomplete]
+##        Changed: 0
 ```
 ]
 
@@ -470,15 +457,33 @@ sql_query
 Podemos hacer consultas por "lotes"
 
 .small[
-```{r}
-sql_query <- dbSendQuery(conn, "SELECT sexo, edad FROM `ene`")
-output1 <- dbFetch(sql_query, 10) 
-DBI::dbHasCompleted(sql_query) 
-output2 <- dbFetch(sql_query, 10) 
-DBI::dbHasCompleted(sql_query) 
-output3 <- dbFetch(sql_query, 94023) 
-DBI::dbHasCompleted(sql_query) 
 
+```r
+sql_query &lt;- dbSendQuery(conn, "SELECT sexo, edad FROM `ene`")
+output1 &lt;- dbFetch(sql_query, 10) 
+DBI::dbHasCompleted(sql_query) 
+```
+
+```
+## [1] FALSE
+```
+
+```r
+output2 &lt;- dbFetch(sql_query, 10) 
+DBI::dbHasCompleted(sql_query) 
+```
+
+```
+## [1] FALSE
+```
+
+```r
+output3 &lt;- dbFetch(sql_query, 94023) 
+DBI::dbHasCompleted(sql_query) 
+```
+
+```
+## [1] TRUE
 ```
 
 ]
@@ -489,21 +494,30 @@ background-position: 100% 0%
 
 # Consultas por lotes
 
-```{r}
-sql_query <- dbSendQuery(conn, "SELECT sexo, edad FROM `ene`")
+
+```r
+sql_query &lt;- dbSendQuery(conn, "SELECT sexo, edad FROM `ene`")
 ```
 
 
-```{r}
-count <- 0
+
+```r
+count &lt;- 0
 # Mientras queden filas por extraer...
 while (DBI::dbHasCompleted(sql_query) == FALSE ) {
   # Traer las 20.000 filas siguientes
-  output <- dbFetch(sql_query, 20000) 
-  count <- count + 1
+  output &lt;- dbFetch(sql_query, 20000) 
+  count &lt;- count + 1
   print(count)
 }
+```
 
+```
+## [1] 1
+## [1] 2
+## [1] 3
+## [1] 4
+## [1] 5
 ```
 Con esta estrategia podemos procesar información de manera fragmentada, incluso en una máquina pequeña 😎 
 
@@ -524,18 +538,27 @@ background-position: 100% 0%
 # dplyr al rescate
 
 .pull-left[
-<img src="imagenes/dplyr-logo.png" width="150" />
+&lt;img src="imagenes/dplyr-logo.png" width="150" /&gt;
 ]
 
 
 .pull-right[
 
-```{r}
-library(dplyr)
-connection <- tbl(conn, "ene")
 
-connection %>% 
+```r
+library(dplyr)
+connection &lt;- tbl(conn, "ene")
+
+connection %&gt;% 
   summarise(freq = n()) 
+```
+
+```
+## # Source:   SQL [1 x 1]
+## # Database: mysql  [reader@143.198.79.143:NA/ine]
+##      freq
+##   &lt;int64&gt;
+## 1   94042
 ```
 
 ]
@@ -544,11 +567,17 @@ connection %>%
 
 Con `show_query` podemos ver la traducción a SQL
 
-```{r}
-connection %>% 
-  summarise(freq = n()) %>% 
-  show_query()
 
+```r
+connection %&gt;% 
+  summarise(freq = n()) %&gt;% 
+  show_query()
+```
+
+```
+## &lt;SQL&gt;
+## SELECT COUNT(*) AS `freq`
+## FROM `ene`
 ```
 
 ---
@@ -561,30 +590,49 @@ background-position: 100% 0%
 
 .pull-left[
 
-```{r}
+
+```r
 library(tictoc)
 tic()
-output <-  connection %>% 
-  filter(edad <= 25) %>% 
-  group_by(sexo) %>% 
+output &lt;-  connection %&gt;% 
+  filter(edad &lt;= 25) %&gt;% 
+  group_by(sexo) %&gt;% 
   summarise(freq = n()) 
 toc()
+```
+
+```
+## 0.02 sec elapsed
 ```
 
 ]
 
 .pull-right[
 
-```{r}
 
+```r
 tic()
-connection %>% 
-  filter(edad <= 25) %>% 
-  group_by(sexo) %>% 
+connection %&gt;% 
+  filter(edad &lt;= 25) %&gt;% 
+  group_by(sexo) %&gt;% 
   summarise(freq = n()) 
+```
+
+```
+## # Source:   SQL [2 x 2]
+## # Database: mysql  [reader@143.198.79.143:NA/ine]
+##   sexo     freq
+##   &lt;chr&gt; &lt;int64&gt;
+## 1 1       15652
+## 2 2       14986
+```
+
+```r
 toc()
+```
 
-
+```
+## 1.048 sec elapsed
 ```
 
 ]
@@ -596,7 +644,7 @@ toc()
 --
 
 .center[
-<img src="imagenes/lazy_bear.jpg" width="150" />
+&lt;img src="imagenes/lazy_bear.jpg" width="150" /&gt;
 ]
 
 
@@ -616,18 +664,29 @@ La consulta funciona por detrás con `dbplyr`
 
 El objeto `output` no es un `dataframe`, sino una conexión a la base de datos
 
-```{r}
+
+```r
 class(output)
+```
+
+```
+## [1] "tbl_MariaDBConnection" "tbl_dbi"               "tbl_sql"              
+## [4] "tbl_lazy"              "tbl"
 ```
 
 --
 
 Con `collect` podemos traer la información desde la base de datos 
 
-```{r}
-output %>%
-  collect() %>% 
+
+```r
+output %&gt;%
+  collect() %&gt;% 
   class()
+```
+
+```
+## [1] "tbl_df"     "tbl"        "data.frame"
 ```
 
 --
@@ -647,15 +706,26 @@ background-position: 100% 0%
 Queremos calcular la cantidad de ocupados para cada una de las regiones del país usando el factor de expansión.  
 
 
-```{r}
+
+```r
 dbListFields(conn, "ene")
+```
 
-ene_data <-  tbl(conn, "ene")
+```
+##  [1] "idrph"               "region"              "provincia"          
+##  [4] "mes_central"         "id_identificacion"   "ano_encuesta"       
+##  [7] "estrato"             "fact_cal"            "sexo"               
+## [10] "edad"                "cae_especifico"      "activ"              
+## [13] "categoria_ocupacion" "habituales"          "efectivas"
+```
 
-df <- ene_data %>% 
-  filter(activ == 1) %>% 
-  group_by(region) %>% 
-  summarize(total = sum(fact_cal) ) %>% 
+```r
+ene_data &lt;-  tbl(conn, "ene")
+
+df &lt;- ene_data %&gt;% 
+  filter(activ == 1) %&gt;% 
+  group_by(region) %&gt;% 
+  summarize(total = sum(fact_cal) ) %&gt;% 
   collect()
 ```
 
@@ -670,12 +740,21 @@ background-position: 100% 0%
 
 Para ver la consulta en SQL, usamos `show_query`
 
-```{r}
-ene_data %>% 
-  filter(activ == 1) %>% 
-  group_by(region) %>% 
-  summarize(total = sum(fact_cal) ) %>% 
+
+```r
+ene_data %&gt;% 
+  filter(activ == 1) %&gt;% 
+  group_by(region) %&gt;% 
+  summarize(total = sum(fact_cal) ) %&gt;% 
   show_query()
+```
+
+```
+## &lt;SQL&gt;
+## SELECT `region`, SUM(`fact_cal`) AS `total`
+## FROM `ene`
+## WHERE (`activ` = 1.0)
+## GROUP BY `region`
 ```
 --
 
@@ -694,15 +773,24 @@ Hasta el momento hemos consultado una base de datos
 
 Estamos usando un usuario que solo tiene permisos de lectura
 
-```{r, error=TRUE}
-df <- data.frame(var1 = c(1:3), var2 = 4:6)
+
+```r
+df &lt;- data.frame(var1 = c(1:3), var2 = 4:6)
 DBI::dbCreateTable(conn, "ene2", df)
+```
+
+```
+## Error: CREATE command denied to user 'reader'@'186.106.141.123' for table `ine`.`ene2` [1142]
 ```
 --
 
-```{r, error=TRUE}
-DBI::dbRemoveTable(conn, "ene")
 
+```r
+DBI::dbRemoveTable(conn, "ene")
+```
+
+```
+## Error: DROP command denied to user 'reader'@'186.106.141.123' for table `ine`.`ene` [1142]
 ```
 
 
@@ -712,7 +800,7 @@ DBI::dbRemoveTable(conn, "ene")
 
 
 .center[
-<img src="imagenes/terminator.jpeg" width="300" />
+&lt;img src="imagenes/terminator.jpeg" width="300" /&gt;
 ]
 
 
@@ -735,39 +823,39 @@ background-position: 100% 0%
 
 Este código genera un archivo sqlite
 
-```{r}
+
+```r
 library(RSQLite)
-my_db_file <- "data/my_db.sqlite"
-new_conn <- dbConnect(RSQLite::SQLite(), my_db_file)
-
-
+my_db_file &lt;- "data/my_db.sqlite"
+new_conn &lt;- dbConnect(RSQLite::SQLite(), my_db_file)
 ```
 
 --
 
 También podemos crear una base que viva en la memoria
 
-```{r}
+
+```r
 library(RSQLite)
-new_conn2 <- dbConnect(RSQLite::SQLite(), ":memory:")
+new_conn2 &lt;- dbConnect(RSQLite::SQLite(), ":memory:")
 DBI::dbDisconnect(new_conn2)
 ```
 
 --
 
 
-```{r, echo=FALSE}
-if (DBI::dbExistsTable(new_conn, "sex_frequency")) {
-  DBI::dbRemoveTable(new_conn, "sex_frequency")
-} 
-```
+
 
 
 Veamos qué contiene nuestra base de datos
 
-```{r}
-dbListTables(new_conn)
 
+```r
+dbListTables(new_conn)
+```
+
+```
+## character(0)
 ```
 
 ---
@@ -780,19 +868,32 @@ background-position: 100% 0%
 
 Usaremos información de la base inicial 
 
-```{r}
-sex_frequency <-  output %>%
+
+```r
+sex_frequency &lt;-  output %&gt;%
   collect() 
 sex_frequency
+```
+
+```
+## # A tibble: 2 × 2
+##   sexo     freq
+##   &lt;chr&gt; &lt;int64&gt;
+## 1 1       15652
+## 2 2       14986
 ```
 
 --
 
 
-```{r}
+
+```r
 dbCreateTable(new_conn, name = "sex_frequency", fields = sex_frequency)
 dbListTables(new_conn)
+```
 
+```
+## [1] "sex_frequency"
 ```
 
 Podemos ver que nuestra tabla existe 😄
@@ -810,8 +911,14 @@ background-position: 100% 0%
 
 ### Hagamos una prueba...
 
-```{r}
+
+```r
 dbReadTable(new_conn, "sex_frequency")
+```
+
+```
+## [1] sexo freq
+## &lt;0 rows&gt; (or 0-length row.names)
 ```
 
 ### Algo no salió bien 😔
@@ -827,8 +934,13 @@ background-position: 100% 0%
 
 Si consultamos por las columnas de la tabla, podemos ver que estas existen
 
-```{r}
+
+```r
 dbListFields(new_conn, "sex_frequency")
+```
+
+```
+## [1] "sexo" "freq"
 ```
 Significa que creamos una tabla, pero esta aun no tiene datos 
 
@@ -836,14 +948,26 @@ Significa que creamos una tabla, pero esta aun no tiene datos
 
 Escribamos en nuestra tabla los datos de frecuencia
 
-```{r}
+
+```r
 dbAppendTable(new_conn, name = "sex_frequency", value = sex_frequency )
+```
+
+```
+## [1] 2
 ```
 
 --
 
-```{r}
+
+```r
 dbReadTable(new_conn, "sex_frequency")
+```
+
+```
+##   sexo  freq
+## 1    1 15652
+## 2    2 14986
 ```
 
 ### ¡Ahí están nuestros datos!
@@ -857,10 +981,24 @@ background-position: 100% 0%
 
 Dado que ahora tenemos permisos de edición, podemos agregar filas 
 
-```{r}
-dbAppendTable(new_conn, "sex_frequency", data.frame(sexo = 3, freq = 9))
-dbReadTable(new_conn, "sex_frequency")
 
+```r
+dbAppendTable(new_conn, "sex_frequency", data.frame(sexo = 3, freq = 9))
+```
+
+```
+## [1] 1
+```
+
+```r
+dbReadTable(new_conn, "sex_frequency")
+```
+
+```
+##   sexo  freq
+## 1    1 15652
+## 2    2 14986
+## 3  3.0     9
 ```
 
 --
@@ -871,12 +1009,13 @@ Podemos encadenar algún proceso sistemático en R a nuestra base de datos 😎
 
 También podemos eliminar tablas, pero esto debe hacerse con cuidado
 
-```{r, eval=FALSE}
+
+```r
 dbRemoveTable(new_conn, "sex_frequency")
 ```
 
 .center[
-<img src="imagenes/danger_zone.jpeg" width="150" />
+&lt;img src="imagenes/danger_zone.jpeg" width="150" /&gt;
 ]
 
 
@@ -913,7 +1052,8 @@ background-position: 100% 0%
 
 Para desconectarnos, usamos dbDisconnect()
 
-```{r}
+
+```r
 DBI::dbDisconnect(conn)
 DBI::dbDisconnect(new_conn)
 ```
@@ -932,7 +1072,7 @@ Despliegue de una bases de datos desde un contenedor (MariaDB, MySQL o PostgreSQ
 
 
 .center[
-<img src="imagenes/logo_docker.png" width="250" />
+&lt;img src="imagenes/logo_docker.png" width="250" /&gt;
 ]
 
 ]
@@ -942,7 +1082,7 @@ Despliegue de una bases de datos desde un contenedor (MariaDB, MySQL o PostgreSQ
 .pull-right[
 Conexión mediante algún IDE
 
-<img src="imagenes/workbench.png" width="300" />
+&lt;img src="imagenes/workbench.png" width="300" /&gt;
 
 
 ]
@@ -954,7 +1094,7 @@ Exponer una base de datos a terceros
 .center[
 
 
-<img src="imagenes/database_connection.png" width="350" />
+&lt;img src="imagenes/database_connection.png" width="350" /&gt;
 
 
 ]
@@ -967,7 +1107,7 @@ class: center, middle
 .linea-superior[]
 .linea-inferior[]
 
-<img src="imagenes/logo_portada2.png" width="200" />
+&lt;img src="imagenes/logo_portada2.png" width="200" /&gt;
 
 
 ## INE Educa: Clases abiertas de R
@@ -975,3 +1115,140 @@ class: center, middle
 ## Proyecto Ciencia de Datos
 
 ### Mayo 2023
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "13:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
