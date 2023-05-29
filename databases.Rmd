@@ -39,24 +39,6 @@ library(xaringanthemer)
 ```
 
 
----
-
-background-image: url("imagenes/fondo2.PNG")
-background-size: contain;
-background-position: 100% 0%
-
-
-# Motivación de la actividad
-
-
-.center[
-
-
-<img src="imagenes/usos_r.png" width="800" />
-
-
-]
-
 
 ---
 
@@ -104,6 +86,7 @@ wc <- wordcloud2(words, size=1.1, color='random-dark')
 ]
 
 
+
 ---
 
 background-image: url("imagenes/fondo2.PNG")
@@ -111,41 +94,48 @@ background-size: contain;
 background-position: 100% 0%
 
 
-# Estructura del taller
+# Motivación de la actividad
 
-**Contenidos de la clase**
 
-- Motivación
+.center[
 
---
 
-- ¿Por qué trabajar con bases de datos? 
+<img src="imagenes/usos_r.png" width="750" />
 
---
 
-- Breve comentario sobre bases de datos
+]
 
 --
 
-- Conexión a una base de datos desde R
+
+.center[
+
+### Esta presentación también está hecha con `R` 
+]
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+
+# Comentario preliminar
+
+
+.center[
+<img src="imagenes/diana.png" width="400" />
+
+### Público objetivo: Usuarios y usuarias intermedios de R
+
+]
 
 --
 
-- Consultas a una base de datos
-
---
-
-- Construcción de una base de datos
-
---
-
-- Consultar nuestra propia base de datos
-
---
-
-**Objetivos de la clase:**
+**Objetivo del taller:**
 
 - Mostrar a los y las participantes cómo interactuar con una base de datos desde R 
+
 
 
 ---
@@ -242,6 +232,22 @@ Coloquialmente, usamos el concepto "base de datos" para referirnos a esto
 ]
 
 
+---
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# ¿Cómo se ve una base de datos?
+
+.center[
+
+
+<img src="imagenes/database_tables.png" width="900" />
+
+
+]
+
+
 
 ---
 
@@ -260,7 +266,9 @@ background-position: 100% 0%
 
 **Las tablas se parecen a los dataframes**
 
-- Colecciones de columnas con datos del mismo tipo
+- Colecciones de columnas
+
+- Las columnas contienen datos del mismo tipo
 
 --
 
@@ -271,20 +279,6 @@ background-position: 100% 0%
 - Los *dataframe* no tienen índices (*data.table* sí tiene)
 
 
----
-background-image: url("imagenes/fondo2.PNG")
-background-size: contain;
-background-position: 100% 0%
-
-# ¿Cómo se ve una base de datos?
-
-.center[
-
-
-<img src="imagenes/database_tables.png" width="900" />
-
-
-]
 
 ---
 
@@ -304,7 +298,7 @@ background-position: 100% 0%
 
 ### Tienen diferencias, pero todas utilizan SQL
 
-### [Aquí](https://en.wikipedia.org/wiki/List_of_relational_database_management_systems) puedes encontrar aún más bases de datos
+### [Aquí](https://en.wikipedia.org/wiki/List_of_relational_database_management_systems) puedes encontrar aún más gestores de bases de datos
 
 
 --
@@ -335,7 +329,7 @@ background-position: 100% 0%
 
 # Conexión a una base de datos
 
-Vamos a conectarnos a una base que contiene datos de la ENE para varios trimestres
+Vamos a conectarnos a una base que contiene datos de la Encuesta Nacional de Empleo (ENE) para varios trimestres
 
 ```{r}
 library(DBI)
@@ -386,7 +380,7 @@ background-position: 100% 0%
 
 ]
 
-### El parámetro driver corresponde a la base de datos que estamos usando
+### El parámetro driver corresponde al gestor de base de datos que estamos usando
 
 ---
 
@@ -447,7 +441,7 @@ No es tan buena idea pedir la tabla completa
 
 --
 
-Noten que `dbGetQuery` devuelve un data.frame con el resultado de la consulta 👀
+Noten que `dbGetQuery` devuelve un *dataframe* con el resultado de la consulta 👀
 
 
 ---
@@ -457,7 +451,7 @@ background-position: 100% 0%
 
 # Consultas por lotes
 
-`dbSendQuery` envía la consulta sin hacer fetch
+`dbSendQuery` envía la consulta sin hacer *fetch* (traer)
 
 .small[
 
@@ -498,7 +492,9 @@ sql_query <- dbSendQuery(conn, "SELECT sexo, edad FROM `ene`")
 
 ```{r}
 count <- 0
+# Mientras queden filas por extraer...
 while (DBI::dbHasCompleted(sql_query) == FALSE ) {
+  # Traer las 20.000 filas siguientes
   output <- dbFetch(sql_query, 20000) 
   count <- count + 1
   print(count)

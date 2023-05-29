@@ -4,7 +4,7 @@
     <title>R and databases</title>
     <meta charset="utf-8" />
     <meta name="author" content="" />
-    <meta name="date" content="2023-05-26" />
+    <meta name="date" content="2023-05-29" />
     <script src="databases_files/header-attrs-2.21/header-attrs.js"></script>
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
@@ -30,24 +30,6 @@ class: center, middle
 
 
 
----
-
-background-image: url("imagenes/fondo2.PNG")
-background-size: contain;
-background-position: 100% 0%
-
-
-# Motivación de la actividad
-
-
-.center[
-
-
-&lt;img src="imagenes/usos_r.png" width="800" /&gt;
-
-
-]
-
 
 ---
 
@@ -71,6 +53,7 @@ background-position: 100% 0%
 ]
 
 
+
 ---
 
 background-image: url("imagenes/fondo2.PNG")
@@ -78,41 +61,48 @@ background-size: contain;
 background-position: 100% 0%
 
 
-# Estructura del taller
+# Motivación de la actividad
 
-**Contenidos de la clase**
 
-- Motivación
+.center[
 
---
 
-- ¿Por qué trabajar con bases de datos? 
+&lt;img src="imagenes/usos_r.png" width="750" /&gt;
 
---
 
-- Breve comentario sobre bases de datos
+]
 
 --
 
-- Conexión a una base de datos desde R
+
+.center[
+
+### Esta presentación también está hecha con `R` 
+]
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+
+# Comentario preliminar
+
+
+.center[
+&lt;img src="imagenes/diana.png" width="400" /&gt;
+
+### Público objetivo: Usuarios y usuarias intermedios de R
+
+]
 
 --
 
-- Consultas a una base de datos
-
---
-
-- Construcción de una base de datos
-
---
-
-- Consultar nuestra propia base de datos
-
---
-
-**Objetivos de la clase:**
+**Objetivo del taller:**
 
 - Mostrar a los y las participantes cómo interactuar con una base de datos desde R 
+
 
 
 ---
@@ -209,6 +199,22 @@ Coloquialmente, usamos el concepto "base de datos" para referirnos a esto
 ]
 
 
+---
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# ¿Cómo se ve una base de datos?
+
+.center[
+
+
+&lt;img src="imagenes/database_tables.png" width="900" /&gt;
+
+
+]
+
+
 
 ---
 
@@ -227,7 +233,9 @@ background-position: 100% 0%
 
 **Las tablas se parecen a los dataframes**
 
-- Colecciones de columnas con datos del mismo tipo
+- Colecciones de columnas
+
+- Las columnas contienen datos del mismo tipo
 
 --
 
@@ -238,20 +246,6 @@ background-position: 100% 0%
 - Los *dataframe* no tienen índices (*data.table* sí tiene)
 
 
----
-background-image: url("imagenes/fondo2.PNG")
-background-size: contain;
-background-position: 100% 0%
-
-# ¿Cómo se ve una base de datos?
-
-.center[
-
-
-&lt;img src="imagenes/database_tables.png" width="900" /&gt;
-
-
-]
 
 ---
 
@@ -271,7 +265,7 @@ background-position: 100% 0%
 
 ### Tienen diferencias, pero todas utilizan SQL
 
-### [Aquí](https://en.wikipedia.org/wiki/List_of_relational_database_management_systems) puedes encontrar aún más bases de datos
+### [Aquí](https://en.wikipedia.org/wiki/List_of_relational_database_management_systems) puedes encontrar aún más gestores de bases de datos
 
 
 --
@@ -302,7 +296,7 @@ background-position: 100% 0%
 
 # Conexión a una base de datos
 
-Vamos a conectarnos a una base que contiene datos de la ENE para varios trimestres
+Vamos a conectarnos a una base que contiene datos de la Encuesta Nacional de Empleo (ENE) para varios trimestres
 
 
 ```r
@@ -344,7 +338,7 @@ background-position: 100% 0%
 
 ]
 
-### El parámetro driver corresponde a la base de datos que estamos usando
+### El parámetro driver corresponde al gestor de base de datos que estamos usando
 
 ---
 
@@ -426,7 +420,7 @@ No es tan buena idea pedir la tabla completa
 
 --
 
-Noten que `dbGetQuery` devuelve un data.frame con el resultado de la consulta 👀
+Noten que `dbGetQuery` devuelve un *dataframe* con el resultado de la consulta 👀
 
 
 ---
@@ -436,7 +430,7 @@ background-position: 100% 0%
 
 # Consultas por lotes
 
-`dbSendQuery` envía la consulta sin hacer fetch
+`dbSendQuery` envía la consulta sin hacer *fetch* (traer)
 
 .small[
 
@@ -505,7 +499,9 @@ sql_query &lt;- dbSendQuery(conn, "SELECT sexo, edad FROM `ene`")
 
 ```r
 count &lt;- 0
+# Mientras queden filas por extraer...
 while (DBI::dbHasCompleted(sql_query) == FALSE ) {
+  # Traer las 20.000 filas siguientes
   output &lt;- dbFetch(sql_query, 20000) 
   count &lt;- count + 1
   print(count)
@@ -602,7 +598,7 @@ toc()
 ```
 
 ```
-## 0.023 sec elapsed
+## 0.018 sec elapsed
 ```
 
 ]
@@ -632,7 +628,7 @@ toc()
 ```
 
 ```
-## 0.916 sec elapsed
+## 0.85 sec elapsed
 ```
 
 ]
@@ -780,7 +776,7 @@ DBI::dbCreateTable(conn, "ene2", df)
 ```
 
 ```
-## Error: CREATE command denied to user 'reader'@'163.247.84.4' for table `ine`.`ene2` [1142]
+## Error: CREATE command denied to user 'reader'@'186.106.141.123' for table `ine`.`ene2` [1142]
 ```
 --
 
@@ -790,7 +786,7 @@ DBI::dbRemoveTable(conn, "ene")
 ```
 
 ```
-## Error: DROP command denied to user 'reader'@'163.247.84.4' for table `ine`.`ene` [1142]
+## Error: DROP command denied to user 'reader'@'186.106.141.123' for table `ine`.`ene` [1142]
 ```
 
 
