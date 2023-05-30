@@ -57,7 +57,7 @@ library(quanteda.textstats)
 library(quanteda.textplots)
 library(dplyr)
 
-comments = read_excel("data/comentarios.xlsx")
+comments = read_excel("data/comentarios_full.xlsx")
 names(comments) = "text"
 
 words <- corpus(comments) %>% 
@@ -72,7 +72,6 @@ words <- corpus(comments) %>%
 
 wc <- wordcloud2(words, size=1.1, color='random-dark')
 
-
 ```
 
 
@@ -80,7 +79,7 @@ wc <- wordcloud2(words, size=1.1, color='random-dark')
 .center[
 
 
-<img src="imagenes/wordcloud.png" width="700" />
+<img src="imagenes/wordcloud.png" width="600" />
 
 
 ]
